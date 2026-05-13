@@ -1,0 +1,41 @@
+name: Atelier 1 - Chiffrement Fernet
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "encrypt ou decrypt"
+        required: true
+        default: "encrypt"
+        type: choice
+        options: [encrypt, decrypt]
+      input_file:
+        description: "Fichier d'entree"
+        required: true
+        default: "secret.txt"
+      output_file:
+        description: "Fichier de sortie"
+        required: true
+        default: "secret.enc"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Chiffrer/Dechiffrer
+        env:
+          FERNET_KEY: ${{ secrets.FERNET_KEY }}
+        run: |
+          python app/fernet_atelier1.py \
+            "${{ inputs.action }}" \
+            "${{ inputs.input_file }}" \
+            "${{ inputs.output_file }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resultat
+          path: ${{ inputs.output_file }}
